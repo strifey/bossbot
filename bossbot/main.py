@@ -1,7 +1,8 @@
 from argparse import ArgumentParser
 
-from bossbot.bot import setup_bot
+from bossbot.bot import BossBot
 from bossbot.config import read_config
+
 
 def main():
     parser = ArgumentParser()
@@ -10,8 +11,9 @@ def main():
 
     config = read_config(args.config)
 
-    bot = setup_bot()
+    bot = BossBot()
     bot.run(config['auth']['API_TOKEN'])
+
 
 if __name__ == '__main__':
     main()
