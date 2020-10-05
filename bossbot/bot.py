@@ -3,20 +3,31 @@ import re
 from functools import wraps
 
 from discord import Client
+from discord import DMChannel
+
+from bossbot.goodreads import handle_gr_cmd
+from bossbot.goodreads import register_gr_user
 
 
 class BossBot(Client):
     bot_commands = []
+    dm_commands = []
     msg_patterns = []
+
+    def __init__(self, config, *args, **kwargs):
+        self.config = config
+        super().__init__(*args, **kwargs)
 
     def _is_ping(self, message: str, only_start: bool = True) -> bool:
         ping = f'<@!{self.user.id}>'
-
         if only_start:
             first_word = message.split()[0]
             return first_word == ping
         else:
             return ping in message
+
+    def _is_dm(self, message):
+        return isinstance(message.channel, DMChannel)
 
     async def on_ready(self):
         print(f'Logged in as {self.user}')
@@ -26,7 +37,15 @@ class BossBot(Client):
             # Here be dragons
             return
 
-        if self._is_ping(message.content):
+        if self._is_dm(message):
+            dm_words = message.content.split()
+            command = dm_words[0]
+            for registered_dm_cmds, func in self.dm_commands:
+                if registered_dm_cmds == command:
+                    await func(self, message)
+
+
+        elif self._is_ping(message.content):
             msg_words = message.content.split()
             if len(msg_words) > 1:
                 command = msg_words[1]
@@ -46,6 +65,18 @@ def on_command(command_pattern):
         return on_command_wrapper
 
     return decorator_on_command
+
+
+def on_dm(dm_pattern):
+    def decorator_on_dm(func):
+        BossBot.dm_commands.append((dm_pattern, func))
+
+        @wraps(func)
+        def on_dm_wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+        return on_dm_wrapper
+
+    return decorator_on_dm
 
 
 @on_command('ping')
@@ -82,3 +113,12 @@ async def shake_8ball(bot, message):
         'Outlook not so good.',
         'Very doubtful.',
     ]))
+
+
+@on_dm('gregister')
+async def register_goodreads_user(bot, message):
+    await register_gr_user(bot, message)
+
+@on_command('gr')
+async def goodreads(bot, message):
+    await handle_gr_cmd(bot, message)

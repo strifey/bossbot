@@ -11,8 +11,8 @@ def main():
 
     config = read_config(args.config)
 
-    bot = BossBot()
-    bot.run(config['auth']['API_TOKEN'])
+    bot = BossBot(config)
+    bot.run(config['discord']['API_TOKEN'])
 
 
 if __name__ == '__main__':
