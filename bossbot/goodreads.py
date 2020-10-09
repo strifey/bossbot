@@ -5,9 +5,8 @@ import requests
 from requests_oauthlib import OAuth1
 from requests_oauthlib import OAuth1Session
 
-user = None
-user_token = None
-user_secret = None
+from bossbot.db import BossDB
+
 
 class GoodReads:
     base_url = 'https://www.goodreads.com/'
@@ -36,18 +35,18 @@ class GoodReads:
         oauth_secret = fetch_resp.get('oauth_token_secret')
 
         authorization_url = o_sess.authorization_url(f'{self.base_url}oauth/authorize')
+        return authorization_url, oauth_token, oauth_secret
+
+    def finish_oauth(self, oauth_token, oauth_secret):
         oauth_access_session = OAuth1Session(
             self.api_key,
             client_secret=self.api_secret,
             resource_owner_key=oauth_token,
             resource_owner_secret=oauth_secret,
         )
-        return authorization_url, oauth_access_session
-
-    def finish_oauth(self, oauth_access_session):
         access_token_url = f'{self.base_url}oauth/access_token'
         access_token = oauth_access_session._fetch_token(access_token_url)
-        return access_token
+        return access_token['oauth_token'], access_token['oauth_token_secret']
 
     def get_currently_reading(self, username, oauth_token, oauth_token_secret):
         resp = self.get('user/show', params={'username': username})
@@ -63,38 +62,45 @@ class GoodReads:
         )
 
 
-async def register_gr_user(bot, message):
+async def start_gr_oauth(bot, message):
+    db = BossDB()
     gr = GoodReads(
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
-    auth_link, finish_sess = gr.start_oauth()
-    s = 10
-    await message.channel.send(f'Click the link below in the next {s} seconds:\n{auth_link}')
-    sleep(s)
+    gr_user = message.content.split()[1]
+
+    auth_link, oauth_token, oauth_secret = gr.start_oauth()
+    db.store_tmp_gr_oauth(message.author.id, gr_user, oauth_token, oauth_secret)
+
+    await message.channel.send(f'Follow this link and authorize bossbot to retrieve data for your account: {auth_link}')
+    await message.channel.send(f'Once you\'ve done that, respond here with `finish-gr-oauth`')
+
+
+async def finish_gr_oauth(bot, message):
+    db = BossDB()
+    gr = GoodReads(
+        bot.config['goodreads']['API_KEY'],
+        bot.config['goodreads']['API_SECRET'],
+    )
     try:
-        tokens = gr.finish_oauth(finish_sess)
-        global user
-        global user_token
-        global user_secret
-        user = message.content.split()[1]
-        user_token = tokens['oauth_token']
-        user_secret = tokens['oauth_token_secret']
+        _, gr_username, oauth_token, oauth_secret = db.pop_tmp_gr_oauth(message.author.id)
+        access_token, access_secret = gr.finish_oauth(oauth_token, oauth_secret)
+        db.add_gr_user_oauth_access(message.author.id, gr_username, access_token, access_secret)
     except Exception as e:
-        print(e)
         await message.channel.send('ugh gross, we failed')
+        raise
     else:
         await message.channel.send('oauth complete!')
 
 
 async def handle_gr_cmd(bot, message):
+    db = BossDB()
     gr = GoodReads(
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
-    global user
-    global user_token
-    global user_secret
+    _, user, user_token, user_secret = db.fetch_user_oauth_access(message.author.id)
     resp = gr.get_currently_reading(user, user_token, user_secret)
     resp = resp.find('reviews').find('review').find('book').find('title').text
     await message.channel.send(resp)

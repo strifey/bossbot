@@ -6,7 +6,8 @@ from discord import Client
 from discord import DMChannel
 
 from bossbot.goodreads import handle_gr_cmd
-from bossbot.goodreads import register_gr_user
+from bossbot.goodreads import start_gr_oauth
+from bossbot.goodreads import finish_gr_oauth
 
 
 class BossBot(Client):
@@ -115,10 +116,14 @@ async def shake_8ball(bot, message):
     ]))
 
 
-@on_dm('gregister')
-async def register_goodreads_user(bot, message):
-    await register_gr_user(bot, message)
+@on_dm('start-gr-oauth')
+async def start_register_goodreads_user(bot, message):
+    await start_gr_oauth(bot, message)
 
-@on_command('gr')
+@on_dm('finish-gr-oauth')
+async def finish_register_goodreads_user(bot, message):
+    await finish_gr_oauth(bot, message)
+
+@on_command('reading')
 async def goodreads(bot, message):
     await handle_gr_cmd(bot, message)
