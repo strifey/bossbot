@@ -70,7 +70,7 @@ async def start_gr_oauth(bot, message):
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
-    
+
     split_msg = message.content.split()
     if len(split_msg) == 1 or len(split_msg) > 2:
         await message.channel.send(
@@ -112,7 +112,14 @@ async def gr_reading(bot, message):
         bot.config['goodreads']['API_SECRET'],
     )
     _, user, user_token, user_secret = db.fetch_user_oauth_access(message.author.id)
-    resp = gr.get_currently_reading(user, user_token, user_secret)
+    try:
+        resp = gr.get_currently_reading(user, user_token, user_secret)
+    except AttributeError:
+        await message.channel.send(
+            'Fetching currently reading failed! Make sure you have a book on your "Currently Reading" shelf. '
+            'If it\'s still failing, rerun `gr-oauth USERNAME` and make sure your username is correct'
+        )
+        return
 
     reading_embeds = []
     for book in resp.iterfind('.//book'):
