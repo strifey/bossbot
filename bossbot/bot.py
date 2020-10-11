@@ -6,7 +6,7 @@ from discord import Client
 from discord import DMChannel
 from discord import Embed
 
-from bossbot.goodreads import handle_gr_cmd
+from bossbot.goodreads import gr_reading
 from bossbot.goodreads import start_gr_oauth
 from bossbot.goodreads import finish_gr_oauth
 
@@ -151,4 +151,4 @@ async def finish_register_goodreads_user(bot, message):
 
 @on_command('reading')
 async def goodreads(bot, message):
-    await handle_gr_reading(bot, message)
+    await gr_reading(bot, message)

@@ -70,8 +70,16 @@ async def start_gr_oauth(bot, message):
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
-    gr_user = message.content.split()[1]
+    
+    split_msg = message.content.split()
+    if len(split_msg) == 1 or len(split_msg) > 2:
+        await message.channel.send(
+            'Invoke this with the format: `gr-oauth USERNAME`. '
+            '`USERNAME` is the "User Name" field at https://www.goodreads.com/user/edit'
+        )
+        return
 
+    gr_user = split_msg[1]
     auth_link, oauth_token, oauth_secret = gr.start_oauth()
     db.store_tmp_gr_oauth(message.author.id, gr_user, oauth_token, oauth_secret)
 
@@ -96,7 +104,7 @@ async def finish_gr_oauth(bot, message):
         await message.channel.send('oauth complete!')
 
 
-async def handle_gr_reading(bot, message):
+async def gr_reading(bot, message):
     await message.add_reaction('📖')
     db = GoodReadsDB()
     gr = GoodReadsAPI(
