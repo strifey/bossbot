@@ -97,6 +97,10 @@ async def pingpong(bot, message):
 async def pingpong(bot, message):
     await message.channel.send('https://i.imgur.com/Ayg3naa.gif')
 
+@on_command('bababooey')
+async def bababooey(bot, message):
+    await message.channel.send('https://www.youtube.com/watch?v=U_cPir6MwLM')
+
 
 @on_command('help')
 async def help(bot, message):
