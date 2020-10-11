@@ -94,7 +94,7 @@ async def pingpong(bot, message):
 
 
 @on_command('pizza')
-async def pingpong(bot, message):
+async def pizza(bot, message):
     await message.channel.send('https://i.imgur.com/Ayg3naa.gif')
 
 @on_command('bababooey')
