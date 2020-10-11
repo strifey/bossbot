@@ -4,6 +4,7 @@ from functools import wraps
 
 from discord import Client
 from discord import DMChannel
+from discord import Embed
 
 from bossbot.goodreads import handle_gr_cmd
 from bossbot.goodreads import start_gr_oauth
@@ -90,6 +91,23 @@ def on_dm(dm_pattern):
 @on_command('ping')
 async def pingpong(bot, message):
     await message.channel.send('pong')
+
+
+@on_command('help')
+async def help(bot, message):
+    embed = Embed(title='Commands', description='Currently registered commands')
+    direct_cmds = '\n'.join(f'• `@bossbot {cmd}`' for cmd, _ in bot.bot_commands)
+    if direct_cmds:
+        embed.add_field(name='Direct commands', value=direct_cmds, inline=True)
+
+    dm_cmds = '\n'.join(f'• `{cmd}`' for cmd, _ in bot.dm_commands)
+    if dm_cmds:
+        dm_cmds = '_(these only work in DMs to the bot)_\n' + dm_cmds
+        embed.add_field(name='DM commands', value=dm_cmds, inline=True)
+    await message.channel.send(
+        '`bossbot` is your friendly, neighborhood, bossy chatbot. Check out my code at https://github.com/strifey/bossbot',
+        embed=embed,
+    )
 
 
 @on_command('choose')
