@@ -35,7 +35,7 @@ class GoodReadsDB(BossDB):
     def store_tmp_gr_oauth(self, user_id, gr_username, oauth_token, oauth_secret):
         cursor = self.cursor()
         cursor.execute(
-            'INSERT INTO GR_OAUTH_SETUP_DATA VALUES (?, ?, ?, ?)',
+            'UPSERT INTO GR_OAUTH_SETUP_DATA VALUES (?, ?, ?, ?)',
             (user_id, gr_username, oauth_token, oauth_secret),
         )
         self.conn.commit()
@@ -58,7 +58,7 @@ class GoodReadsDB(BossDB):
     def add_gr_user_oauth_access(self, user_id, gr_username, access_token, access_secret):
         cursor = self.cursor()
         cursor.execute(
-            'INSERT INTO GR_OAUTH_ACCESS VALUES (?, ?, ?, ?)',
+            'UPSERT INTO GR_OAUTH_ACCESS VALUES (?, ?, ?, ?)',
             (user_id, gr_username, access_token, access_secret),
         )
         self.conn.commit()

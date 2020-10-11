@@ -13,7 +13,6 @@ from bossbot.goodreads import finish_gr_oauth
 class BossBot(Client):
     bot_commands = []
     dm_commands = []
-    msg_patterns = []
 
     def __init__(self, config, *args, **kwargs):
         self.config = config
