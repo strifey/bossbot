@@ -2,13 +2,14 @@ from time import sleep
 from xml.etree import ElementTree
 
 import requests
+from discord import Embed
 from requests_oauthlib import OAuth1
 from requests_oauthlib import OAuth1Session
 
-from bossbot.db import BossDB
+from bossbot.db import GoodReadsDB
 
 
-class GoodReads:
+class GoodReadsAPI:
     base_url = 'https://www.goodreads.com/'
 
     def __init__(self, api_key, api_secret):
@@ -63,8 +64,8 @@ class GoodReads:
 
 
 async def start_gr_oauth(bot, message):
-    db = BossDB()
-    gr = GoodReads(
+    db = GoodReadsDB()
+    gr = GoodReadsAPI(
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
@@ -78,8 +79,8 @@ async def start_gr_oauth(bot, message):
 
 
 async def finish_gr_oauth(bot, message):
-    db = BossDB()
-    gr = GoodReads(
+    db = GoodReadsDB()
+    gr = GoodReadsAPI(
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
@@ -95,12 +96,36 @@ async def finish_gr_oauth(bot, message):
 
 
 async def handle_gr_cmd(bot, message):
-    db = BossDB()
-    gr = GoodReads(
+    await message.add_reaction('📖')
+    db = GoodReadsDB()
+    gr = GoodReadsAPI(
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
     _, user, user_token, user_secret = db.fetch_user_oauth_access(message.author.id)
     resp = gr.get_currently_reading(user, user_token, user_secret)
-    resp = resp.find('reviews').find('review').find('book').find('title').text
-    await message.channel.send(resp)
+
+    reading_embeds = []
+    for book in resp.iterfind('.//book'):
+        author = book.find('./authors/author/name').text
+        pub_year = book.find('./publication_year').text
+        description = book.find('./description').text
+        book_embed = Embed(
+            title=book.find('title').text,
+            description=f'**by {author} ({pub_year})**\n{description}',
+            url=book.find('link').text,
+        )
+        book_embed.set_image(url=book.find('image_url').text)
+        book_embed.set_footer(
+            text='Provided by Goodreads™',
+            icon_url='https://s.gr-assets.com/assets/icons/goodreads_icon_32x32-6c9373254f526f7fdf2980162991a2b3.png'
+        )
+        reading_embeds.append(book_embed)
+
+    if reading_embeds:
+        await message.channel.send(f'<@!{message.author.id}> is currently reading:', embed=reading_embeds[0])
+        reading_embeds  = reading_embeds[1:]
+        for next_embed in reading_embeds:
+            await message.channel.send('', embed=next_embed)
+    else:
+        await message.channel.send('<@!{message.author.id}> is not currently reading anything! (did you DM me `gr-oauth` yet?)')

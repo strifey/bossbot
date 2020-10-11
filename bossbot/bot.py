@@ -38,22 +38,26 @@ class BossBot(Client):
             # Here be dragons
             return
 
-        if self._is_dm(message):
-            dm_words = message.content.split()
-            command = dm_words[0]
-            for registered_dm_cmds, func in self.dm_commands:
-                if registered_dm_cmds == command:
-                    await func(self, message)
+        try:
+            if self._is_dm(message):
+                dm_words = message.content.split()
+                command = dm_words[0]
+                for registered_dm_cmds, func in self.dm_commands:
+                    if registered_dm_cmds == command:
+                        await func(self, message)
 
 
-        elif self._is_ping(message.content):
-            msg_words = message.content.split()
-            if len(msg_words) > 1:
-                command = msg_words[1]
+            elif self._is_ping(message.content):
+                msg_words = message.content.split()
+                if len(msg_words) > 1:
+                    command = msg_words[1]
 
-            for cmd_match, func in self.bot_commands:
-                if command == cmd_match:
-                    await func(self, message)
+                for cmd_match, func in self.bot_commands:
+                    if command == cmd_match:
+                        await func(self, message)
+        except Exception as e:
+            await message.add_reaction('💢')
+            raise
 
 
 def on_command(command_pattern):
@@ -116,7 +120,7 @@ async def shake_8ball(bot, message):
     ]))
 
 
-@on_dm('start-gr-oauth')
+@on_dm('gr-oauth')
 async def start_register_goodreads_user(bot, message):
     await start_gr_oauth(bot, message)
 

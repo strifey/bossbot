@@ -30,6 +30,8 @@ class BossDB:
     def cursor(self, *args, **kwargs):
         return self.conn.cursor(*args, **kwargs)
 
+
+class GoodReadsDB(BossDB):
     def store_tmp_gr_oauth(self, user_id, gr_username, oauth_token, oauth_secret):
         cursor = self.cursor()
         cursor.execute(
