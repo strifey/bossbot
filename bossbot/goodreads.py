@@ -96,7 +96,7 @@ async def finish_gr_oauth(bot, message):
         await message.channel.send('oauth complete!')
 
 
-async def handle_gr_cmd(bot, message):
+async def handle_gr_reading(bot, message):
     await message.add_reaction('📖')
     db = GoodReadsDB()
     gr = GoodReadsAPI(

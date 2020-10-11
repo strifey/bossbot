@@ -134,4 +134,4 @@ async def finish_register_goodreads_user(bot, message):
 
 @on_command('reading')
 async def goodreads(bot, message):
-    await handle_gr_cmd(bot, message)
+    await handle_gr_reading(bot, message)
