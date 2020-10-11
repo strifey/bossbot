@@ -93,6 +93,11 @@ async def pingpong(bot, message):
     await message.channel.send('pong')
 
 
+@on_command('pizza')
+async def pingpong(bot, message):
+    await message.channel.send('https://i.imgur.com/Ayg3naa.gif')
+
+
 @on_command('help')
 async def help(bot, message):
     embed = Embed(title='Commands', description='Currently registered commands')
