@@ -110,7 +110,7 @@ async def handle_gr_cmd(bot, message):
     for book in resp.iterfind('.//book'):
         author = book.find('./authors/author/name').text
         pub_year = book.find('./publication_year').text
-        description = book.find('./description').text
+        description = book.find('./description').text[:1500]
         rating = book.find('./average_rating').text
         ratings_count = book.find('./ratings_count').text
         book_embed = Embed(
@@ -120,7 +120,7 @@ async def handle_gr_cmd(bot, message):
             colour=Colour.from_rgb(135, 89, 39),
         )
         book_embed.add_field(name='Description (may contain spoilers!)', value=f'||{description}||')
-        book_embed.add_field(name='Rating', value=f'{rating}/5. {ratings_count} ratings.', inline=True)
+        book_embed.add_field(name='Rating', value=f'Rated **{rating}/5** based on {ratings_count} ratings', inline=True)
         book_embed.set_image(url=book.find('image_url').text)
         book_embed.set_footer(
             text='Provided by Goodreads™',

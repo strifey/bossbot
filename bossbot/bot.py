@@ -37,6 +37,9 @@ class BossBot(Client):
         if message.author == self.user:
             # Here be dragons
             return
+        elif not message.content:
+            # No command, we sleep
+            return
 
         try:
             if self._is_dm(message):
@@ -55,6 +58,7 @@ class BossBot(Client):
                 for cmd_match, func in self.bot_commands:
                     if command == cmd_match:
                         await func(self, message)
+
         except Exception as e:
             await message.add_reaction('💢')
             raise
