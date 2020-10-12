@@ -105,6 +105,7 @@ async def finish_gr_oauth(bot, message):
 
 
 async def gr_reading(bot, message):
+    GR_ICON_URL = 'https://s.gr-assets.com/assets/icons/goodreads_icon_32x32-6c9373254f526f7fdf2980162991a2b3.png'
     await message.add_reaction('📖')
     db = GoodReadsDB()
     gr = GoodReadsAPI(
@@ -139,7 +140,7 @@ async def gr_reading(bot, message):
         book_embed.set_image(url=book.find('image_url').text)
         book_embed.set_footer(
             text='Provided by Goodreads™',
-            icon_url='https://s.gr-assets.com/assets/icons/goodreads_icon_32x32-6c9373254f526f7fdf2980162991a2b3.png'
+            icon_url=GR_ICON_URL,
         )
         reading_embeds.append(book_embed)
 
