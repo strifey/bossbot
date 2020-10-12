@@ -52,7 +52,7 @@ class BossBot(Client):
 
 
             elif self._is_ping(message.content):
-                if (message.author.id == 97558918720389120 and random.randint(1, 20) == 20):
+                if (message.author.id == 97558918720389120 and random.randint(1, 35) == 35):
                     await message.channel.send("go fuck yourself")
                     return
 
