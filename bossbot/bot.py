@@ -21,10 +21,11 @@ class BossBot(Client):
         super().__init__(*args, **kwargs)
 
     def _is_ping(self, message: str, only_start: bool = True) -> bool:
-        ping = f'<@!{self.user.id}>'
+        mention = f'<@{self.user.id}>'
         if only_start:
-            first_word = message.split()[0]
-            return first_word == ping
+            # Removes !, which usually indicates a mention, but it's weirdly not always there
+            first_word = message.split()[0].replace('!', '')
+            return first_word == mention or first_word == '@bossbot'
         else:
             return ping in message
 
@@ -102,6 +103,7 @@ async def pingpong(bot, message):
 async def pizza(bot, message):
     await message.channel.send('https://i.imgur.com/Ayg3naa.gif')
 
+
 @on_command('bababooey')
 async def bababooey(bot, message):
     await message.channel.send('https://www.youtube.com/watch?v=U_cPir6MwLM')
@@ -158,6 +160,7 @@ async def shake_8ball(bot, message):
 @on_dm('gr-oauth')
 async def start_register_goodreads_user(bot, message):
     await start_gr_oauth(bot, message)
+
 
 @on_dm('finish-gr-oauth')
 async def finish_register_goodreads_user(bot, message):
