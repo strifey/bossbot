@@ -5,6 +5,7 @@ from functools import wraps
 from discord import Client
 from discord import DMChannel
 from discord import Embed
+import requests
 
 from bossbot.goodreads import gr_reading
 from bossbot.goodreads import start_gr_oauth
@@ -206,3 +207,9 @@ async def roll(bot, message):
         results_embed.add_field(name='Total', value='{0} = {1}'.format(
             ' + '.join(list(map(str, totals))), sum(totals)))
     await message.channel.send(embed=results_embed)
+
+
+@on_command('inspire')
+async def inspire(bot, message):
+    inspired_url = requests.get('https://inspirobot.me/api?generate=true').text
+    await message.channel.send(inspired_url)
