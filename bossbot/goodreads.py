@@ -7,6 +7,7 @@ from discord import Embed
 from requests_oauthlib import OAuth1
 from requests_oauthlib import OAuth1Session
 
+from bossbot.bot import BossBot
 from bossbot.db import GoodReadsDB
 
 
@@ -64,6 +65,7 @@ class GoodReadsAPI:
         )
 
 
+@BossBot.on_dm('gr-oauth')
 async def start_gr_oauth(bot, message):
     db = GoodReadsDB()
     gr = GoodReadsAPI(
@@ -87,6 +89,7 @@ async def start_gr_oauth(bot, message):
     await message.channel.send(f'Once you\'ve done that, respond here with `finish-gr-oauth`')
 
 
+@BossBot.on_dm('finish-gr-oauth')
 async def finish_gr_oauth(bot, message):
     db = GoodReadsDB()
     gr = GoodReadsAPI(
@@ -104,6 +107,7 @@ async def finish_gr_oauth(bot, message):
         await message.channel.send('oauth complete!')
 
 
+@BossBot.on_command('reading')
 async def gr_reading(bot, message):
     GR_ICON_URL = 'https://s.gr-assets.com/assets/icons/goodreads_icon_32x32-6c9373254f526f7fdf2980162991a2b3.png'
     await message.add_reaction('📖')
