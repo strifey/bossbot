@@ -1,4 +1,5 @@
 import random
+import urllib
 
 import requests
 
@@ -36,6 +37,20 @@ async def choose(bot, message):
         await message.channel.send(random.choice(choosen))
     else:
         await message.channel.send('Give me something to choose from!')
+
+
+@BossBot.on_command('trump')
+async def trump(bot, message):
+    split_msg = message.content.split(maxsplit=2)
+    if len(split_msg) != 3:
+        await message.channel.send('Bad format. Use `@bossbot trump something`.')
+        return
+    response = requests.get(
+        'https://api.whatdoestrumpthink.com/api/v1/quotes/personalized?q={}'.format(urllib.parse.quote(split_msg[2])))
+    if response.status_code != requests.codes.ok:
+        raise Exception
+    quote = response.json()['message']
+    await message.channel.send(quote)
 
 
 @BossBot.on_command('8ball')
