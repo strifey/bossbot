@@ -1,3 +1,5 @@
+from html.parser import HTMLParser
+from io import StringIO
 from time import sleep
 from xml.etree import ElementTree
 
@@ -107,6 +109,30 @@ async def finish_gr_oauth(bot, message):
         await message.channel.send('oauth complete!')
 
 
+class HTMLStripper(HTMLParser):
+    '''shamelessly stolen from
+    https://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
+    '''
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs= True
+        self.text = StringIO()
+
+    def handle_data(self, d):
+        self.text.write(d)
+
+    def get_data(self):
+        return self.text.getvalue()
+
+    @classmethod
+    def strip(cls, html):
+        c = cls()
+        c.feed(html)
+        return c.get_data()
+
+
 @BossBot.on_command('reading')
 async def gr_reading(bot, message):
     GR_ICON_URL = 'https://s.gr-assets.com/assets/icons/goodreads_icon_32x32-6c9373254f526f7fdf2980162991a2b3.png'
@@ -130,7 +156,8 @@ async def gr_reading(bot, message):
     for book in resp.iterfind('.//book'):
         author = book.find('./authors/author/name').text
         pub_year = book.find('./publication_year').text
-        description = book.find('./description').text[:1500]
+        description = book.find('./description').text
+        description = HTMLStripper.strip(description)[:800]  # Max embed is 1024 chars.
         rating = book.find('./average_rating').text
         ratings_count = book.find('./ratings_count').text
         book_embed = Embed(
