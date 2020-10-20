@@ -91,7 +91,8 @@ class BossBot(Client):
 @BossBot.on_command('help')
 async def help(bot, message):
     embed = Embed(title='Commands', description='Currently registered commands')
-    direct_cmds = '\n'.join(f'• `@bossbot {cmd}`' for cmd, _ in bot.bot_commands)
+    sorted_cmds = sorted(cmd for cmd, _ in bot.bot_commands)
+    direct_cmds = '\n'.join(f'• `@bossbot {cmd}`' for cmd in sorted_cmds)
     if direct_cmds:
         embed.add_field(name='Direct commands', value=direct_cmds, inline=True)
 
@@ -100,6 +101,7 @@ async def help(bot, message):
         dm_cmds = '_(these only work in DMs to the bot)_\n' + dm_cmds
         embed.add_field(name='DM commands', value=dm_cmds, inline=True)
     await message.channel.send(
-        '`bossbot` is your friendly, neighborhood, bossy chatbot. Check out my code at https://github.com/strifey/bossbot',
+        ('`bossbot` is your ~~sassy~~ friendly, neighborhood chatbot.\n'
+        'Check out my code at https://github.com/strifey/bossbot'),
         embed=embed,
     )

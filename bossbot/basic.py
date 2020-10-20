@@ -1,5 +1,6 @@
 import random
 import urllib
+from io import StringIO
 
 import requests
 
@@ -32,11 +33,30 @@ async def inspire(bot, message):
 @BossBot.on_command('choose')
 async def choose(bot, message):
     split_msg = message.content.split(maxsplit=2)
-    if len(split_msg) == 3:
-        choosen = split_msg[2].split(',')
-        await message.channel.send(random.choice(choosen))
-    else:
-        await message.channel.send('Give me something to choose from!')
+    if len(split_msg) != 3:
+        await message.channel.send('Give me something to choose from! Example: `@bossbot choose live, die`')
+        return
+    choosen = split_msg[2].split(',')
+    await message.channel.send(random.choice(choosen))
+
+
+@BossBot.on_command('spongebob')
+async def spongebob(bot, message):
+    split_msg = message.content.split(maxsplit=2)
+    if len(split_msg) != 3:
+        await message.channel.send('Bad format. Use `@bossbot spongebob something`.')
+        return
+    to_sponge = split_msg[2]
+
+    spongey = StringIO()
+    spongey.write(to_sponge[0].lower())
+    upper = False
+    for char in to_sponge[1:]:
+        # Don't repeat upper-case. If prev was lower-case 50/50 of upper or lower
+        upper = bool(random.randint(0, 1)) if not upper else False
+        spongey.write(char.upper() if upper else char.lower())
+
+    await message.channel.send(spongey.getvalue())
 
 
 @BossBot.on_command('trump')
