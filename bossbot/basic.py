@@ -30,6 +30,12 @@ async def inspire(bot, message):
     await message.channel.send(inspired_url)
 
 
+@BossBot.on_command('catfact')
+async def catfact(bot, message):
+    cat_fact = requests.get('https://catfact.ninja/fact').json()['fact']
+    await message.channel.send(cat_fact)
+
+
 @BossBot.on_command('choose')
 async def choose(bot, message):
     split_msg = message.content.split(maxsplit=2)
