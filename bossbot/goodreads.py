@@ -1,6 +1,7 @@
 from html.parser import HTMLParser
 from io import StringIO
 from time import sleep
+from urllib.parse import urljoin
 from xml.etree import ElementTree
 
 import requests
@@ -22,7 +23,7 @@ class GoodReadsAPI:
         self.session = requests.Session()
 
     def get(self, *args, **kwargs):
-        args = (self.base_url + args[0], *args[1:])
+        args = (urljoin(self.base_url, args[0]), *args[1:])
         if 'params' in kwargs:
             kwargs['params']['key'] = self.api_key
         else:
@@ -35,11 +36,11 @@ class GoodReadsAPI:
     def start_oauth(self):
         o_sess = OAuth1Session(self.api_key, client_secret=self.api_secret)
 
-        fetch_resp = o_sess.fetch_request_token(f'{self.base_url}oauth/request_token')
+        fetch_resp = o_sess.fetch_request_token(urljoin(self.base_url, 'oauth/request_token'))
         oauth_token = fetch_resp.get('oauth_token')
         oauth_secret = fetch_resp.get('oauth_token_secret')
 
-        authorization_url = o_sess.authorization_url(f'{self.base_url}oauth/authorize')
+        authorization_url = o_sess.authorization_url(urljoin(self.base_url, 'oauth/authorize'))
         return authorization_url, oauth_token, oauth_secret
 
     def finish_oauth(self, oauth_token, oauth_secret):
@@ -49,7 +50,7 @@ class GoodReadsAPI:
             resource_owner_key=oauth_token,
             resource_owner_secret=oauth_secret,
         )
-        access_token_url = f'{self.base_url}oauth/access_token'
+        access_token_url = urljoin(self.base_url, 'oauth/access_token')
         access_token = oauth_access_session._fetch_token(access_token_url)
         return access_token['oauth_token'], access_token['oauth_token_secret']
 

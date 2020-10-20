@@ -47,7 +47,8 @@ async def trump(bot, message):
         return
     response = requests.get(
         'https://api.whatdoestrumpthink.com/api/v1/quotes/personalized?q={}'.format(
-            urllib.parse.quote(split_msg[2]))
+            urllib.parse.quote(split_msg[2]),
+        )
     )
     response.raise_for_status()
     quote = response.json()['message']
