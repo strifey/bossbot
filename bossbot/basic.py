@@ -64,6 +64,17 @@ async def spongebob(bot, message):
     await message.channel.send(spongey.getvalue())
 
 
+@BossBot.on_command('aesthetic')
+async def aesthetic(bot, message):
+    split_msg = message.content.split(maxsplit=2)
+    if len(split_msg) != 3:
+        await message.channel.send('Bad format. Use `@bossbot aesthetic something`.')
+        return
+    words = split_msg[2].split()
+    yus = '   '.join(' '.join(c.upper() for c in word) for word in words)
+    await message.channel.send(f'`{yus}`')
+
+
 @BossBot.on_command('trump')
 async def trump(bot, message):
     split_msg = message.content.split(maxsplit=2)
