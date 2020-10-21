@@ -11,7 +11,7 @@ async def bababooey(bot, message):
     if author_voice_status is not None and author_voice_status.channel is not None:
         bababooey_audio_stream = FFmpegPCMAudio(
             'bossbot/resources/bababooey.mp3'
-            )
+        )
         voice_client = await author_voice_status.channel.connect()
         voice_client.play(bababooey_audio_stream)
         while voice_client.is_playing():
