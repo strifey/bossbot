@@ -7,9 +7,10 @@ from bossbot.config import read_config
 
 # A module must be listed here to be imported and its registration decorators to be run
 REGISTERED_MODULES = [
+    'bossbot.bababooey',
     'bossbot.basic',
-    'bossbot.roll',
     'bossbot.goodreads',
+    'bossbot.roll',
 ]
 
 
