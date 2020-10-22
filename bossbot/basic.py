@@ -10,7 +10,6 @@ from bossbot.bot import BossBot
 CALL_RESPONSE = {
     'ping': 'pong',
     'pizza': 'https://i.imgur.com/Ayg3naa.gif',
-    'bababooey': 'https://www.youtube.com/watch?v=U_cPir6MwLM',
 }
 
 
