@@ -8,4 +8,4 @@ Just a dumb bot I'm using as an outlet to code in my free time. It's currently b
 2. `make venv`
 3. `venv/bin/python -m bossbot.main`
 
-Might need to install these packages: `sqlite python-dev python-venv`.
+Might need to install these packages: `sqlite python-dev python-venv ffmpeg`.
