@@ -9,6 +9,7 @@ from bossbot.config import read_config
 REGISTERED_MODULES = [
     'bossbot.bababooey',
     'bossbot.basic',
+    'bossbot.cfb',
     'bossbot.goodreads',
     'bossbot.roll',
 ]
