@@ -11,7 +11,7 @@ from bossbot.bot import BossBot
 
 WEEKLY_SCORES = 'https://data.ncaa.com/casablanca/scoreboard/football/fbs/{year}/{week:02}/scoreboard.json'
 LIVE_SCORES = 'https://data.ncaa.com/casablanca/live-today.json'
-TEAMS = ['GATECH', 'AUBURN', 'CLEM', 'FLA', 'ALA', 'OHIOST']
+TEAMS = ['GATECH', 'AUBURN', 'CLEM', 'FLA', 'ALA', 'WISC']
 CONFERENCES = ['ACC', 'SEC', 'Big Ten', 'Big 12', 'Pac-12', 'Top 25']
 HELP_TEXT = f'Bad format. Try `@bossbot cfb` or include a conference from: {CONFERENCES}'
 TRACKED_TEAMS_DESC = 'Showing tracked teams scores for the latest week with played games'
