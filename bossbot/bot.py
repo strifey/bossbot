@@ -43,7 +43,8 @@ class BossBot(Client):
         for pattern, reaction in REACT_PATTERNS.items():
             if re.search(pattern, message.content, flags=re.IGNORECASE) is not None:
                 emoji = discord.utils.get(self.emojis, name=reaction)
-                await message.add_reaction(emoji)
+                if emoji is not None:
+                    await message.add_reaction(emoji)
 
     async def on_ready(self):
         print(f'Logged in as {self.user}')
