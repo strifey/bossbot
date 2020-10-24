@@ -10,6 +10,7 @@ from discord import Embed
 
 REACT_PATTERNS = {
     'hwat': 'hwat',
+    'hark': 'hark',
     'jobs': 'jerbs',
     'boo': 'booooo',
     'yikes': 'yikes',
