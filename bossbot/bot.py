@@ -2,9 +2,20 @@ import random
 import re
 from functools import wraps
 
+import discord.utils
 from discord import Client
 from discord import DMChannel
 from discord import Embed
+
+
+REACT_PATTERNS = {
+    'hwat': 'hwat',
+    'jobs': 'jerbs',
+    'boo': 'booooo',
+    'yikes': 'yikes',
+    'french': 'frencharjun',
+    'king': 'kingkyle',
+}
 
 
 class BossBot(Client):
@@ -27,6 +38,12 @@ class BossBot(Client):
     def _is_dm(self, message):
         return isinstance(message.channel, DMChannel)
 
+    async def _autoreact(self, message):
+        for pattern, reaction in REACT_PATTERNS.items():
+            if re.search(pattern, message.content, flags=re.IGNORECASE) is not None:
+                emoji = discord.utils.get(self.emojis, name=reaction)
+                await message.add_reaction(emoji)
+
     async def on_ready(self):
         print(f'Logged in as {self.user}')
 
@@ -39,6 +56,8 @@ class BossBot(Client):
             return
 
         try:
+            await self._autoreact(message)
+
             if self._is_dm(message):
                 dm_words = message.content.split()
                 command = dm_words[0]
