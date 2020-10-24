@@ -50,6 +50,8 @@ class GameInfo:
     state: str
     start_time: str
     start_date: datetime
+    quarter: str
+    time_left: str
 
     @classmethod
     def from_json(cls, d):
@@ -75,6 +77,8 @@ class GameInfo:
             state=game_state,
             start_time=d['startTime'],
             start_date=start_date,
+            quarter=d['currentPeriod'],
+            time_left=d['contestClock'],
         )
 
 
@@ -145,7 +149,10 @@ def add_gameday_field(embed, day):
                 game_info = game.start_time
             score = 'vs.'
         else:
-            score = f'({game.away.score} - {game.home.score})'
+            score = f'({game.away.score}-{game.home.score})'
+            if game_info == 'LIVE':
+                game_info = f'{game.quarter} {game.time_left}'
+
         game_bullets.append(
             f'• {game.away.rank} **{game.away.short}** {score} {game.home.rank} **{game.home.short}**⠀--⠀{game_info}'
         )
