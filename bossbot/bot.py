@@ -40,8 +40,8 @@ class BossBot(Client):
         return isinstance(message.channel, DMChannel)
 
     async def _autoreact(self, message):
-        for pattern, reaction in REACT_PATTERNS.items():
-            if re.search(pattern, message.content, flags=re.IGNORECASE) is not None:
+        for word, reaction in REACT_PATTERNS.items():
+            if re.search(f'(\W|^){word}(\W|$)', message.content, flags=re.IGNORECASE) is not None:
                 emoji = discord.utils.get(self.emojis, name=reaction)
                 if emoji is not None:
                     await message.add_reaction(emoji)
