@@ -9,7 +9,8 @@ from pytz import timezone
 
 from bossbot.bot import BossBot
 
-WEEKLY_SCORES = 'https://data.ncaa.com/casablanca/scoreboard/football/fbs/{year}/{week:02}/scoreboard.json'
+WEEKLY_SCORES = 'https://data.ncaa.com/casablanca/scoreboard/football/fbs/{year}/{week}/scoreboard.json'
+TODAY_URL = 'https://data.ncaa.com/casablanca/schedule/football/fbs/today.json'
 TEAMS = ['GATECH', 'AUBURN', 'CLEM', 'FLA', 'ALA', 'WISC']
 CONFERENCES = ['ACC', 'SEC', 'Big Ten', 'Big 12', 'Pac-12', 'Top 25']
 HELP_TEXT = f'Bad format. Try `@bossbot cfb` or include a conference from: {CONFERENCES}'
@@ -121,22 +122,23 @@ def filter_by_conference(games, conference):
 
 def fetch_latest_played_games():
     year = datetime.now().year
-    last_week = None
-    for week in range(1, 16):
-        weekly_data = requests.get(
-            WEEKLY_SCORES.format(year=year, week=week)
-        ).json()['games']
-        # Throw games into class for more structured data
-        weekly_data = [
-            GameInfo.from_json(g['game'])
-            for g in weekly_data
-        ]
-        if not week_has_played_games(weekly_data):
-            week -= 1
-            break
-        last_week = weekly_data
+    today = requests.get(TODAY_URL).json()['today']
+    year, week = today.split('/')
 
-    return last_week
+    try:
+        week = f'{week:02}'
+    except ValueError:
+        pass
+
+    weekly_data = requests.get(
+        WEEKLY_SCORES.format(year=year, week=week)
+    ).json()['games']
+
+    weekly_data = [
+        GameInfo.from_json(g['game'])
+        for g in weekly_data
+    ]
+    return weekly_data
 
 
 def add_gameday_field(embed, day):
