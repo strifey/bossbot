@@ -10,7 +10,7 @@ REGISTERED_MODULES = [
     'bossbot.bababooey',
     'bossbot.basic',
     'bossbot.cfb',
-    'bossbot.goodreads',
+    # 'bossbot.goodreads', # rip goodreads API
     'bossbot.roll',
 ]
 
