@@ -16,6 +16,7 @@ REACT_PATTERNS = {
     'yikes': 'yikes',
     'french': 'frencharjun',
     'king': 'kingkyle',
+    'shrug': 'shrug',
 }
 
 
