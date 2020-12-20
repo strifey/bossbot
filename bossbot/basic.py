@@ -110,3 +110,10 @@ async def shake_8ball(bot, message):
         'Outlook not so good.',
         'Very doubtful.',
     ]))
+
+
+@BossBot.on_command('what')
+async def what(bot, message):
+    split_msg = message.content.lower().replace(',', '').split(maxsplit=1)
+    if split_msg[1] == 'what do i do lord':
+        await message.channel.send('destroy the child. corrupt them all')
