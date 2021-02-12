@@ -1,3 +1,4 @@
+import json
 import random
 import urllib
 from io import StringIO
@@ -33,6 +34,15 @@ async def inspire(bot, message):
 async def catfact(bot, message):
     cat_fact = requests.get('https://catfact.ninja/fact').json()['fact']
     await message.channel.send(cat_fact)
+
+
+@BossBot.on_command('stumble')
+async def stumble(bot, message):
+    stumble_url = requests.post(
+        'https://service.stumblingon.com/getSite',
+        data=json.dumps({'userId': 'bossbot'}),
+    ).json()['url']
+    await message.channel.send(stumble_url)
 
 
 @BossBot.on_command('choose')
