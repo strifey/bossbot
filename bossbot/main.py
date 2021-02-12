@@ -12,6 +12,7 @@ REGISTERED_MODULES = [
     'bossbot.cfb',
     # 'bossbot.goodreads', # rip goodreads API
     'bossbot.roll',
+    'bossbot.stonks',
 ]
 
 
