@@ -71,7 +71,7 @@ class GoodReadsDB(BossDB):
         )
         self.conn.commit()
 
-    def fetch_user_oauth_access(self, user_id):
+    def fetch_gr_user_oauth_access(self, user_id):
         cursor = self.cursor()
         return cursor.execute(
             'SELECT * FROM GR_OAUTH_ACCESS WHERE user_id=:user_id',
