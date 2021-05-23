@@ -7,6 +7,7 @@ from xdg import XDG_DATA_HOME
 DEFAULT_DB_FILE = 'bossbot.sql'
 GR_SETUP_TABLE = 'CREATE TABLE GR_OAUTH_SETUP_DATA(user_id INTEGER PRIMARY KEY, gr_username TEXT, oauth_token TEXT, oauth_secret TEXT)'
 GR_OAUTH_TABLE = 'CREATE TABLE GR_OAUTH_ACCESS(user_id INTEGER PRIMARY KEY, gr_username TEXT, access_token TEXT, access_secret TEXT)'
+LASTFM_USER_TABLE = 'CREATE TABLE LASTFM_USERS(user_id INTEGER PRIMARY KEY, lastfm_username TEXT)'
 
 
 class BossDB:
@@ -25,6 +26,7 @@ class BossDB:
             cursor = self.conn.cursor()
             cursor.execute(GR_SETUP_TABLE)
             cursor.execute(GR_OAUTH_TABLE)
+            cursor.execute(LASTFM_USER_TABLE)
             self.conn.commit()
 
     def cursor(self, *args, **kwargs):
@@ -75,5 +77,24 @@ class GoodReadsDB(BossDB):
         cursor = self.cursor()
         return cursor.execute(
             'SELECT * FROM GR_OAUTH_ACCESS WHERE user_id=:user_id',
+            {'user_id': user_id},
+        ).fetchone()
+
+    def store_lastfm_username(self, user_id, lastfm_username):
+        cursor = self.cursor()
+        cursor.execute(
+            (
+                'INSERT INTO LASTFM_USERS VALUES (?, ?) '
+                'ON CONFLICT(user_id) DO UPDATE SET '
+                'lastfm_username=excluded.lastfm_username'
+            ),
+            (user_id, lastfm_username),
+        )
+        self.conn.commit()
+
+    def fetch_lastfm_user(self, user_id):
+        cursor = self.cursor()
+        return cursor.execute(
+            'SELECT lastfm_username FROM LASTFM_USERS WHERE user_id=:user_id',
             {'user_id': user_id},
         ).fetchone()
