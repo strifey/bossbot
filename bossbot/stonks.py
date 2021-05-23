@@ -39,8 +39,8 @@ class Quote:
 
 
 def fetch_symbol_quote(symbol, api_token):
-    api_url = f'https://cloud.iexapis.com/stable/stock/{symbol}/quote?token={api_token}'
-    raw_data =  requests.get(api_url).json()
+    api_url = f'https://cloud.iexapis.com/stable/stock/{symbol}/quote'
+    raw_data =  requests.get(api_url, params={'token': api_token}).json()
     return Quote.from_json(raw_data)
 
 

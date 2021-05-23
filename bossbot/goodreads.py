@@ -143,7 +143,7 @@ async def gr_reading(bot, message):
         bot.config['goodreads']['API_KEY'],
         bot.config['goodreads']['API_SECRET'],
     )
-    _, user, user_token, user_secret = db.fetch_user_oauth_access(message.author.id)
+    _, user, user_token, user_secret = db.fetch_gr_user_oauth_access(message.author.id)
     try:
         resp = gr.get_currently_reading(user, user_token, user_secret)
     except AttributeError:
