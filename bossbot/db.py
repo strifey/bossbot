@@ -4,12 +4,10 @@ import sqlite3
 from xdg import XDG_DATA_HOME
 
 
-DEFAULT_DB_FILE = '/Users/rawrjun/code/bossbot/bossbot.sql'
+DEFAULT_DB_FILE = 'bossbot.sql'
 GR_SETUP_TABLE = 'CREATE TABLE GR_OAUTH_SETUP_DATA(user_id INTEGER PRIMARY KEY, gr_username TEXT, oauth_token TEXT, oauth_secret TEXT)'
 GR_OAUTH_TABLE = 'CREATE TABLE GR_OAUTH_ACCESS(user_id INTEGER PRIMARY KEY, gr_username TEXT, access_token TEXT, access_secret TEXT)'
 LASTFM_USER_TABLE = 'CREATE TABLE LASTFM_USERS(user_id INTEGER PRIMARY KEY, lastfm_username TEXT)'
-
-# For tracking a users Karma/Dharma.
 KARMA_TRACKER_TABLE = 'CREATE TABLE KARMA_TRACKER(user_id INTEGER PRIMARY KEY, karma INTEGER)'
 
 class BossDB:
@@ -36,7 +34,7 @@ class BossDB:
         return self.conn.cursor(*args, **kwargs)
 
 class KarmaDB(BossDB):
-    def init_user_karma(self, user_id):
+    def set_user_karma(self, user_id, karma):
         cursor = self.cursor()
         cursor.execute(
             (
@@ -44,27 +42,11 @@ class KarmaDB(BossDB):
                 'ON CONFLICT(user_id) DO UPDATE SET '
                 'karma=excluded.karma'
             ),
-            (user_id, 0),
+            (user_id, karma),
         )
         self.conn.commit()
 
-    def increase_user_karma(self, user_id):
-        cursor = self.cursor()
-        karma = cursor.execute(
-            'SELECT karma FROM KARMA_TRACKER WHERE user_id=:user_id',
-            {'user_id': user_id},
-        ).fetchone()[0]
-        cursor.execute(
-            (
-                'INSERT INTO KARMA_TRACKER VALUES (?, ?) '
-                'ON CONFLICT(user_id) DO UPDATE SET '
-                'karma=excluded.karma'
-            ),
-            (user_id, karma + 1),
-        )
-        self.conn.commit()
-
-    def fetch_user_karma(self, user_id):
+    def get_user_karma(self, user_id):
         cursor = self.cursor()
         karma = cursor.execute(
             'SELECT karma FROM KARMA_TRACKER WHERE user_id=:user_id',
@@ -72,7 +54,7 @@ class KarmaDB(BossDB):
         ).fetchone()[0]
         self.conn.commit()
         if not karma:
-            self.init_user_karma(user_id)
+            self.set_user_karma(user_id, 0)
             return 0
         return karma
 
