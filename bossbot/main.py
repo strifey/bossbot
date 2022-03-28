@@ -14,6 +14,7 @@ REGISTERED_MODULES = [
     'bossbot.listening',
     'bossbot.roll',
     'bossbot.stonks',
+    'bossbot.karma',
 ]
 
 

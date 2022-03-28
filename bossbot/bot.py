@@ -69,10 +69,6 @@ class BossBot(Client):
                         await func(self, message)
 
             elif self._is_ping(message.content):
-                if (message.author.id == 97558918720389120 and random.randint(1, 35) == 35):
-                    await message.channel.send("go fuck yourself")
-                    return
-
                 msg_words = message.content.split()
                 if len(msg_words) > 1:
                     command = msg_words[1]
