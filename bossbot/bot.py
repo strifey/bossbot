@@ -11,12 +11,11 @@ from discord import Embed
 REACT_PATTERNS = {
     'hwat': 'hwat',
     'hark': 'hark',
-    'jobs': 'jerbs',
-    'boo': 'booooo',
     'yikes': 'yikes',
     'french': 'frencharjun',
-    'king': 'kingkyle',
     'shrug': 'shrug',
+    '69': 'nice',
+    '420': '420',
 }
 
 
