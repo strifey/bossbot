@@ -19,5 +19,4 @@ async def increase_karma(bot, message):
     karma = db.get_user_karma(user.id)
     db.set_user_karma(user.id, karma + 1)
     karma = db.get_user_karma(user.id)
-    print('update: {}: {}'.format(user.id, karma))
     await message.channel.send('<@{user}> has {karma} karma'.format(user=user.id, karma=karma))
