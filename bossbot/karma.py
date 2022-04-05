@@ -13,7 +13,6 @@ async def check_karma(bot, message):
 
 @BossBot.on_command('++')
 async def increase_karma(bot, message):
-    # print('mentioned user {}'.format(message.mentions[1]))
     user = message.mentions[1]
     db = KarmaDB()
     karma = db.get_user_karma(user.id)
