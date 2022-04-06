@@ -52,13 +52,16 @@ class KarmaDB(BossDB):
         karma = cursor.execute(
             'SELECT karma FROM KARMA_TRACKER WHERE user_id=:user_id',
             {'user_id': user_id},
-        ).fetchone()[0]
+        ).fetchone()
         self.conn.commit()
         if not karma:
             self.set_user_karma(user_id, 0)
             return 0
-        return karma
+        return karma[0]
 
+    def increment_user_karma(self, user_id):
+        karma = self.get_user_karma(user_id)
+        self.set_user_karma(user_id, karma + 1)
 
 
 class GoodReadsDB(BossDB):
