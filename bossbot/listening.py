@@ -5,7 +5,7 @@ from discord import Colour
 from discord import Embed
 
 from bossbot.bot import BossBot
-from bossbot.db import GoodReadsDB
+from bossbot.db import LastFMDB
 
 
 @dataclass
@@ -48,7 +48,7 @@ def fetch_latest_track(api_key, username):
 async def listening(bot, message):
     api_token = bot.config['lastfm']['API_KEY']
 
-    db = GoodReadsDB()
+    db = LastFMDB(testing=bot.testing)
     username = db.fetch_lastfm_user(message.author.id)
     if username is None:
         await message.channel.send(f'<@!{message.author.id}> has not registered a last.fm username!')
@@ -84,7 +84,7 @@ async def register_username_dm(bot, message):
     if len(split_msg) != 2:
         await message.channel.send('Please dm `lastfm USERNAME` to register a username with bossbot')
         return
-    db = GoodReadsDB()
+    db = LastFMDB(testing=bot.testing)
     db.store_lastfm_username(message.author.id, split_msg[1])
     await message.channel.send('last.fm username set!')
 
@@ -95,6 +95,6 @@ async def register_username_cmd(bot, message):
     if len(split_msg) != 3:
         await message.channel.send('Please try `@bossbot lastfm USERNAME` to register a username with bossbot')
         return
-    db = GoodReadsDB()
+    db = LastFMDB()
     db.store_lastfm_username(message.author.id, split_msg[2])
     await message.channel.send('last.fm username set!')

@@ -25,8 +25,9 @@ class BossBot(Client):
     dm_commands = []
     interval_funcs = []
 
-    def __init__(self, config, *args, **kwargs):
+    def __init__(self, config, testing, *args, **kwargs):
         self.config = config
+        self.testing = testing
         self.job_scheduler = AsyncIOScheduler()
 
         super().__init__(*args, **kwargs)
