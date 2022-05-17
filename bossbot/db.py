@@ -8,6 +8,7 @@ DEFAULT_DB_FILE = 'bossbot.sql'
 GR_SETUP_TABLE = 'CREATE TABLE GR_OAUTH_SETUP_DATA(user_id INTEGER PRIMARY KEY, gr_username TEXT, oauth_token TEXT, oauth_secret TEXT)'
 GR_OAUTH_TABLE = 'CREATE TABLE GR_OAUTH_ACCESS(user_id INTEGER PRIMARY KEY, gr_username TEXT, access_token TEXT, access_secret TEXT)'
 LASTFM_USER_TABLE = 'CREATE TABLE LASTFM_USERS(user_id INTEGER PRIMARY KEY, lastfm_username TEXT)'
+KARMA_TRACKER_TABLE = 'CREATE TABLE KARMA_TRACKER(user_id INTEGER PRIMARY KEY, plus_karma INTEGER, minus_karma INTEGER)'
 
 
 class BossDB:
@@ -27,10 +28,48 @@ class BossDB:
             cursor.execute(GR_SETUP_TABLE)
             cursor.execute(GR_OAUTH_TABLE)
             cursor.execute(LASTFM_USER_TABLE)
+            cursor.execute(KARMA_TRACKER_TABLE)
             self.conn.commit()
 
     def cursor(self, *args, **kwargs):
         return self.conn.cursor(*args, **kwargs)
+
+class KarmaDB(BossDB):
+    def set_user_karma(self, user_id, plus_karma, minus_karma):
+        cursor = self.cursor()
+        cursor.execute(
+            (
+                'INSERT INTO KARMA_TRACKER VALUES (?, ?, ?) '
+                'ON CONFLICT(user_id) DO UPDATE SET '
+                'plus_karma=excluded.plus_karma, minus_karma=excluded.minus_karma'
+            ),
+            (user_id, plus_karma, minus_karma),
+        )
+        self.conn.commit()
+
+    def get_user_karma(self, user_id):
+        cursor = self.cursor()
+        plus_karma = cursor.execute(
+            'SELECT plus_karma FROM KARMA_TRACKER WHERE user_id=:user_id',
+            {'user_id': user_id},
+        ).fetchone()
+        minus_karma = cursor.execute(
+            'SELECT minus_karma FROM KARMA_TRACKER WHERE user_id=:user_id',
+            {'user_id': user_id},
+        ).fetchone()
+        self.conn.commit()
+        if not plus_karma:
+            self.set_user_karma(user_id, 0, 0)
+            return (0, 0)
+        return (plus_karma[0], minus_karma[0])
+
+    def increment_user_karma(self, user_id):
+        plus_karma, minus_karma = self.get_user_karma(user_id)
+        self.set_user_karma(user_id, plus_karma + 1, minus_karma)
+
+    def decrement_user_karma(self, user_id):
+        plus_karma, minus_karma = self.get_user_karma(user_id)
+        self.set_user_karma(user_id, plus_karma, minus_karma + 1)
 
 
 class GoodReadsDB(BossDB):
