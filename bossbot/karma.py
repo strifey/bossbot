@@ -17,7 +17,7 @@ async def get_target_user(message):
 async def notify_karma(user_id, plus_karma, minus_karma, message):
     karma = plus_karma - minus_karma
     await message.channel.send(
-            '<@{user}> has {karma} karma ({plus_karma} - {minus_karma})'.format(
+            '<@{user}> has {karma} karma (++{plus_karma}, --{minus_karma})'.format(
                 user=user_id,
                 karma=karma,
                 plus_karma=plus_karma,
