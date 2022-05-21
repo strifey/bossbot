@@ -3,6 +3,7 @@ import re
 from functools import wraps
 
 import discord.utils
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord import Client
 from discord import DMChannel
 from discord import Embed
@@ -22,10 +23,24 @@ REACT_PATTERNS = {
 class BossBot(Client):
     bot_commands = []
     dm_commands = []
+    interval_funcs = []
 
-    def __init__(self, config, *args, **kwargs):
+    def __init__(self, config, testing, *args, **kwargs):
         self.config = config
+        self.testing = testing
+        self.job_scheduler = AsyncIOScheduler()
+
         super().__init__(*args, **kwargs)
+
+        self.job_scheduler.start()
+        for int_args, int_kwargs, func in self.interval_funcs:
+            if 'trigger' in int_kwargs:
+                trigger = int_kwargs['trigger']
+            else:
+                # Just assume since this is likely the most common usecase
+                trigger = 'interval'
+
+            self.job_scheduler.add_job(func, trigger=trigger, args=(self,), **int_kwargs)
 
     def _is_ping(self, message: str, only_start: bool = True) -> bool:
         mention = f'<@{self.user.id}>'
@@ -103,6 +118,18 @@ class BossBot(Client):
             return on_dm_wrapper
 
         return decorator_on_dm
+
+    @classmethod
+    def on_interval(cls, *a, **kw):
+        def decorator_on_interval(func):
+            BossBot.interval_funcs.append((a, kw, func))
+
+            @wraps(func)
+            def on_interval_wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return on_interval_wrapper
+
+        return decorator_on_interval
 
 
 @BossBot.on_command('help')

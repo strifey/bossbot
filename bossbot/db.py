@@ -1,35 +1,60 @@
 import os.path
 import sqlite3
+import tempfile
+from datetime import datetime
 
 from xdg import XDG_DATA_HOME
 
 
 DEFAULT_DB_FILE = 'bossbot.sql'
-GR_SETUP_TABLE = 'CREATE TABLE GR_OAUTH_SETUP_DATA(user_id INTEGER PRIMARY KEY, gr_username TEXT, oauth_token TEXT, oauth_secret TEXT)'
-GR_OAUTH_TABLE = 'CREATE TABLE GR_OAUTH_ACCESS(user_id INTEGER PRIMARY KEY, gr_username TEXT, access_token TEXT, access_secret TEXT)'
-LASTFM_USER_TABLE = 'CREATE TABLE LASTFM_USERS(user_id INTEGER PRIMARY KEY, lastfm_username TEXT)'
-KARMA_TRACKER_TABLE = 'CREATE TABLE KARMA_TRACKER(user_id INTEGER PRIMARY KEY, plus_karma INTEGER, minus_karma INTEGER)'
+BOSSBOT_DB_SCHEMA = '''\
+CREATE TABLE IF NOT EXISTS GR_OAUTH_SETUP_DATA(
+    user_id INTEGER PRIMARY KEY, gr_username TEXT, oauth_token TEXT, oauth_secret TEXT
+);
+CREATE TABLE IF NOT EXISTS GR_OAUTH_ACCESS(
+    user_id INTEGER PRIMARY KEY, gr_username TEXT, access_token TEXT, access_secret TEXT
+);
+CREATE TABLE IF NOT EXISTS LASTFM_USERS(
+    user_id INTEGER PRIMARY KEY, lastfm_username TEXT
+);
+CREATE TABLE IF NOT EXISTS LETTERBOXD_SUBS(
+    letterboxd_username TEXT NOT NULL,
+    channel_id INTEGER NOT NULL,
+    last_announced TIMESTAMP NOT NULL,
+    PRIMARY KEY (letterboxd_username, channel_id)
+);
+CREATE TABLE KARMA_TRACKER(
+    user_id INTEGER PRIMARY KEY,
+    plus_karma INTEGER,
+    minus_karma INTEGER
+);
+'''
 
 
 class BossDB:
+    schema_ran = False
+    testing_tmpfile = None
+
     def __init__(
         self,
+        testing=True,
         db_file=XDG_DATA_HOME.joinpath(DEFAULT_DB_FILE),
     ):
-        self.db_file = db_file
-        create = False
+        # use tmpfile db for testing purposes
+        if testing and self.testing_tmpfile is None:
+            BossDB.testing_tmpfile = tempfile.NamedTemporaryFile().name
 
-        if not os.path.exists(self.db_file):
-            create = True
+        self.db_file = db_file if not testing else self.testing_tmpfile
+        self.conn = sqlite3.connect(
+            self.db_file,
+            detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES,
+        )
 
-        self.conn = sqlite3.connect(self.db_file)
-        if create:
+        if not self.schema_ran:
             cursor = self.conn.cursor()
-            cursor.execute(GR_SETUP_TABLE)
-            cursor.execute(GR_OAUTH_TABLE)
-            cursor.execute(LASTFM_USER_TABLE)
-            cursor.execute(KARMA_TRACKER_TABLE)
+            cursor.executescript(BOSSBOT_DB_SCHEMA)
             self.conn.commit()
+            BossDB.schema_ran = True
 
     def cursor(self, *args, **kwargs):
         return self.conn.cursor(*args, **kwargs)
@@ -119,6 +144,7 @@ class GoodReadsDB(BossDB):
             {'user_id': user_id},
         ).fetchone()
 
+class LastFMDB(BossDB):
     def store_lastfm_username(self, user_id, lastfm_username):
         cursor = self.cursor()
         cursor.execute(
@@ -137,3 +163,45 @@ class GoodReadsDB(BossDB):
             'SELECT lastfm_username FROM LASTFM_USERS WHERE user_id=:user_id',
             {'user_id': user_id},
         ).fetchone()
+
+
+class AlreadySubbedError(Exception):
+    pass
+
+
+class LetterboxdDB(BossDB):
+    def sub_letterboxd_user(self, letterboxd_username, channel_id):
+        cursor = self.cursor()
+
+        try:
+            cursor.execute(
+                ('INSERT INTO LETTERBOXD_SUBS VALUES (?, ?, ?);'),
+                (letterboxd_username, channel_id, datetime.now()),
+            )
+        except sqlite3.IntegrityError:
+            raise AlreadySubbedError
+
+        self.conn.commit()
+        return cursor.execute(
+            'SELECT * FROM LETTERBOXD_SUBS WHERE letterboxd_username=? AND channel_id=?;',
+            (letterboxd_username, channel_id)
+        ).fetchone()
+
+    def unsub_letterboxd_user(self, letterboxd_username, channel_id):
+        cursor = self.cursor()
+        cursor.execute(
+            ('DELETE FROM LETTERBOXD_SUBS WHERE letterboxd_username=? AND channel_id=?;'),
+            (letterboxd_username, channel_id),
+        )
+        self.conn.commit()
+
+    def get_all_subs(self):
+        return self.cursor().execute('SELECT* FROM LETTERBOXD_SUBS').fetchall()
+
+    def set_last_announced(self, letterboxd_username, channel_id, last_announced):
+        cursor = self.cursor()
+        cursor.execute(
+            ('UPDATE LETTERBOXD_SUBS SET last_announced=:last_announced WHERE letterboxd_username=:letterboxd_username AND channel_id=:channel_id;'),
+            {'letterboxd_username': letterboxd_username, 'channel_id': channel_id, 'last_announced': last_announced},
+        )
+        self.conn.commit()
