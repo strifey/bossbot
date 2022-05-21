@@ -1,0 +1,11 @@
+aiohttp
+arrow
+APScheduler
+configparser
+discord.py
+feedparser
+humanize
+pytz
+PyNaCL
+requests
+xdg
