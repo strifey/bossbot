@@ -12,7 +12,7 @@ from bossbot.db import AlreadySubbedError
 
 
 RSS_URL = 'https://letterboxd.com/{user}/rss/'
-POSTER_URL_REGEX = r'img src="(?P<url>.+)"'
+POSTER_URL_REGEX = r'img src="(?P<url>.+?)"'
 
 
 def format_lbd_entry(entry):
