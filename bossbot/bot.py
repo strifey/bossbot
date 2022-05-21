@@ -1,8 +1,11 @@
 import random
 import re
+import traceback
+from functools import partial
 from functools import wraps
 
 import discord.utils
+from aiohttp import web
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord import Client
 from discord import DMChannel
@@ -24,15 +27,22 @@ class BossBot(Client):
     bot_commands = []
     dm_commands = []
     interval_funcs = []
+    webhooks = []
 
     def __init__(self, config, testing, *args, **kwargs):
         self.config = config
         self.testing = testing
-        self.job_scheduler = AsyncIOScheduler()
+
+        self._setup_jobs()
 
         super().__init__(*args, **kwargs)
 
-        self.job_scheduler.start()
+    async def start(self, *args, **kwargs):
+        await self.start_webapp()
+        await super().start(*args, **kwargs)
+
+    def _setup_jobs(self):
+        self.job_scheduler = AsyncIOScheduler()
         for int_args, int_kwargs, func in self.interval_funcs:
             if 'trigger' in int_kwargs:
                 trigger = int_kwargs['trigger']
@@ -41,6 +51,24 @@ class BossBot(Client):
                 trigger = 'interval'
 
             self.job_scheduler.add_job(func, trigger=trigger, args=(self,), **int_kwargs)
+        self.job_scheduler.start()
+
+    async def start_webapp(self):
+        self._base_webapp = web.Application()
+        self.app = web.Application()
+        self.app['bot'] = self
+
+        for method, route, handler in self.webhooks:
+            self.app.router.add_route(method, route, handler)
+
+        # We have two applications, one as a subapp, to get /bossbot/ prepended to all routes
+        self._base_webapp.add_subapp('/bossbot/', self.app) 
+
+        runner = web.AppRunner(self._base_webapp, handle_signals=True)
+        await runner.setup()
+        site = web.TCPSite(runner, '0.0.0.0', self.config['webhooks']['PORT'])
+        await site.start()
+        
 
     def _is_ping(self, message: str, only_start: bool = True) -> bool:
         mention = f'<@{self.user.id}>'
@@ -130,6 +158,26 @@ class BossBot(Client):
             return on_interval_wrapper
 
         return decorator_on_interval
+
+    @classmethod
+    def on_webhook(cls, route, method='POST'):
+        def decorator_on_webhook(func):
+            BossBot.webhooks.append((method, route, func))
+
+            @wraps(func)
+            def on_webhook_wrapper(*args, **kwargs):
+                return func(*args, **kwargs)
+            return on_webhook_wrapper
+
+        return decorator_on_webhook
+        
+
+    async def on_error(self, event, *args, **kwargs):
+        if self.testing and event == 'on_message':
+            tb = traceback.format_exc()
+            msg = args[0]
+            await msg.channel.send(f'```{tb}```')
+        await super().on_error(event, *args, **kwargs)
 
 
 @BossBot.on_command('help')
