@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+import asyncio
 import importlib
 
 from bossbot.bot import BossBot
@@ -13,6 +14,7 @@ REGISTERED_MODULES = [
     # 'bossbot.goodreads', # rip goodreads API
     'bossbot.letterboxd',
     'bossbot.listening',
+    'bossbot.plex',
     'bossbot.roll',
     'bossbot.stonks',
     'bossbot.karma',
