@@ -26,14 +26,14 @@ async def notify_karma(user_id, plus_karma, minus_karma, message):
 @BossBot.on_command('karma')
 async def check_karma(bot, message):
     user = await get_target_user(message)
-    db = KarmaDB()
+    db = KarmaDB(testing=bot.testing)
     plus_karma, minus_karma = db.get_user_karma(user.id)
     await notify_karma(user.id, plus_karma, minus_karma, message)
 
 @BossBot.on_command('++')
 async def increment_karma(bot, message):
     user = await get_target_user(message)
-    db = KarmaDB()
+    db = KarmaDB(testing=bot.testing)
     db.increment_user_karma(user.id)
     # post update notification
     plus_karma, minus_karma = db.get_user_karma(user.id)
@@ -43,7 +43,7 @@ async def increment_karma(bot, message):
 @BossBot.on_command('--')
 async def decrement_karma(bot, message):
     user = await get_target_user(message)
-    db = KarmaDB()
+    db = KarmaDB(testing=bot.testing)
     db.decrement_user_karma(user.id)
     # post update notification
     plus_karma, minus_karma = db.get_user_karma(user.id)
