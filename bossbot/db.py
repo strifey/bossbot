@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS LETTERBOXD_SUBS(
     last_announced TIMESTAMP NOT NULL,
     PRIMARY KEY (letterboxd_username, channel_id)
 );
-CREATE TABLE KARMA_TRACKER(
+CREATE TABLE IF NOT EXISTS KARMA_TRACKER(
     user_id INTEGER PRIMARY KEY,
     plus_karma INTEGER,
     minus_karma INTEGER
