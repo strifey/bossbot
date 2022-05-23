@@ -35,7 +35,7 @@ async def announce_new_library_entry(bot, payload, thumb_fp):
         url='attachment://thumb.jpg',
     )
 
-    channel_ids = bot.config['plex']['CHANNELS'].split(',')
+    channel_ids = bot.config.get('plex', {}).get('CHANNELS', '').split(',')
     for channel_id in channel_ids:
         channel = await bot.fetch_channel(channel_id)
         await channel.send(embed=embed, file=thumb_file)
@@ -43,10 +43,11 @@ async def announce_new_library_entry(bot, payload, thumb_fp):
 
 @BossBot.on_webhook('/plex')
 async def handle_plex_webhook(request):
+    payload = None
     thumb_fp = None
 
     reader = await request.multipart()
-    while not reader.at_eof():
+    while True:
         res = await reader.next()
         if res is None:
             break
@@ -56,7 +57,7 @@ async def handle_plex_webhook(request):
         else:
             thumb_fp = BytesIO(await res.read())
 
-    if payload['event'] == 'library.new':
+    if payload and payload['event'] == 'library.new':
         if thumb_fp:
             await announce_new_library_entry(request.app['bot'], payload, thumb_fp)
     # Only support new library entries for now
