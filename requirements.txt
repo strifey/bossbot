@@ -5,7 +5,7 @@ arrow==1.2.2
 async-timeout==4.0.2
 attrs==21.4.0
 backports.zoneinfo==0.2.1
-certifi==2022.5.18.1
+certifi==2022.12.7
 cffi==1.15.0
 charset-normalizer==2.0.12
 configparser==5.2.0
