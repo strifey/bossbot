@@ -16,7 +16,11 @@ POSTER_URL_REGEX = r'img src="(?P<url>.+?)"'
 
 
 def format_lbd_entry(entry):
-    poster_url = re.search(POSTER_URL_REGEX, entry.summary).group('url')
+    poster_search = re.search(POSTER_URL_REGEX, entry.summary)
+    poster_url = None
+    if poster_search is not None:
+        poster_url = poster_search.group('url')
+
     return Embed(
         title=entry.title,
         description=f'{entry.author} just logged this movie',
