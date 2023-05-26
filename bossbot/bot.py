@@ -7,6 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord import Client
 from discord import DMChannel
 from discord import Embed
+from discord import Intents
 
 
 REACT_PATTERNS = {
@@ -29,8 +30,7 @@ class BossBot(Client):
         self.config = config
         self.testing = testing
         self.job_scheduler = AsyncIOScheduler()
-
-        super().__init__(*args, **kwargs)
+        super().__init__(intents=Intents.default())
 
         self.job_scheduler.start()
         for int_args, int_kwargs, func in self.interval_funcs:
