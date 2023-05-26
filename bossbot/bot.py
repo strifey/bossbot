@@ -1,3 +1,4 @@
+import asyncio
 import random
 import re
 from functools import wraps
@@ -8,6 +9,7 @@ from discord import Client
 from discord import DMChannel
 from discord import Embed
 from discord import Intents
+from discord.utils import setup_logging
 
 
 REACT_PATTERNS = {
@@ -27,12 +29,11 @@ class BossBot(Client):
     interval_funcs = []
 
     def __init__(self, config, testing, *args, **kwargs):
+        super().__init__(intents=Intents.default())
         self.config = config
         self.testing = testing
-        self.job_scheduler = AsyncIOScheduler()
-        super().__init__(intents=Intents.default())
 
-        self.job_scheduler.start()
+        self.job_scheduler = AsyncIOScheduler(event_loop=asyncio.get_running_loop())
         for int_args, int_kwargs, func in self.interval_funcs:
             if 'trigger' in int_kwargs:
                 trigger = int_kwargs['trigger']
@@ -41,6 +42,9 @@ class BossBot(Client):
                 trigger = 'interval'
 
             self.job_scheduler.add_job(func, trigger=trigger, args=(self,), **int_kwargs)
+        self.job_scheduler.start()
+
+        setup_logging()
 
     def _is_ping(self, message: str, only_start: bool = True) -> bool:
         mention = f'<@{self.user.id}>'

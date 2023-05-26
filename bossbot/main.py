@@ -1,3 +1,4 @@
+import asyncio
 from argparse import ArgumentParser
 import importlib
 
@@ -19,7 +20,7 @@ REGISTERED_MODULES = [
 ]
 
 
-def main():
+async def main():
     parser = ArgumentParser()
     parser.add_argument('-c', '--config', help='Config file path', default='bossbot.ini')
     parser.add_argument('-t', '--testing', help='Testing Mode', default=False, action='store_true')
@@ -30,8 +31,10 @@ def main():
         importlib.import_module(module)
     # Actually create and run the bot
     bot = BossBot(config, args.testing)
-    bot.run(config['discord']['API_TOKEN'])
+    async with bot:
+        await bot.start(config['discord']['API_TOKEN'])
+
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
