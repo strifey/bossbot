@@ -2,6 +2,7 @@ aiohttp
 arrow
 APScheduler
 configparser
+davey
 discord.py
 feedparser
 humanize
