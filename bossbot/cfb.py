@@ -3,9 +3,9 @@ from datetime import datetime
 from collections import defaultdict
 
 import requests
+import zoneinfo
 from discord import Colour
 from discord import Embed
-from pytz import timezone
 
 from bossbot.bot import BossBot
 
@@ -60,7 +60,7 @@ class GameInfo:
         game_state=d['gameState']
         start_date = datetime.fromtimestamp(
             int(d['startTimeEpoch'])
-        ).astimezone(timezone('US/Eastern'))
+        ).astimezone(zoneinfo.ZoneInfo('US/Eastern'))
 
         if game_state == 'FINAL':
             if home.winner:
@@ -83,7 +83,7 @@ class GameInfo:
 
 
 def week_has_played_games(games):
-    now = datetime.now().astimezone(timezone('US/Eastern'))
+    now = datetime.now().astimezone(zoneinfo.ZoneInfo('US/Eastern'))
     first_game_of_week = min(
         game.start_date
         for game in games
@@ -94,7 +94,7 @@ def week_has_played_games(games):
 
 
 def all_games_played(games):
-    now = datetime.now().astimezone(timezone('US/Eastern'))
+    now = datetime.now().astimezone(zoneinfo.ZoneInfo('US/Eastern'))
     last_game_of_week = max(
         game.start_date
         for game in games

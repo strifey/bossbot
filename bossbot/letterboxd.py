@@ -15,7 +15,7 @@ RSS_URL = 'https://letterboxd.com/{user}/rss/'
 POSTER_URL_REGEX = r'img src="(?P<url>.+?)"'
 
 
-def format_lbd_entry(entry):
+def format_lbd_watched(entry):
     poster_search = re.search(POSTER_URL_REGEX, entry.summary)
     poster_url = None
     if poster_search is not None:
@@ -33,7 +33,7 @@ def format_lbd_entry(entry):
     )
 
 
-@BossBot.on_interval(minutes=1)
+@BossBot.on_interval(minutes=2)
 async def post_letterboxd_updates(bot):
     run_time = datetime.now()
 
@@ -52,7 +52,7 @@ async def post_letterboxd_updates(bot):
                 break
 
             channel = bot.get_channel(channel_id)
-            await channel.send(embed=format_lbd_entry(post))
+            await channel.send(embed=format_lbd_watched(post))
 
             db.set_last_announced(user, channel_id, run_time)
 
